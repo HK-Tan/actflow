@@ -1,4 +1,4 @@
-"""The set-form graft of Tan et al. (2026, arXiv:2608.29461) and the head-shared
+"""The set-form graft of the locks' source paper and the head-shared
 batched graft tails. Graft at block l's output, every position:  x <- x - <x,u> u + t u."""
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ def graft_rows(x, u, t):
 
 @contextmanager
 def graft_hook(model, layer, u, t):
-    """The graft as a forward hook, as in Tan et al. (2026), one direction, for cross-checks."""
+    """The graft as a forward hook, one direction, for cross-checks."""
     def h(m, i, o):
         x = _out_tensor(o)
         vv = u.to(x.dtype)

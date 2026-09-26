@@ -21,7 +21,7 @@ from .data import LETTERS
 
 
 def letter_ids(tok, n: int = 4) -> list[int]:
-    """Token ids of ' A'..' D' (the recipe of Tan et al. 2026)."""
+    """Token ids of ' A'..' D' (the recipe of the locks' source code)."""
     return [tok(" " + L, add_special_tokens=False).input_ids[-1] for L in LETTERS[:n]]
 
 

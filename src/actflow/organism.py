@@ -1,4 +1,4 @@
-"""Organisms. make_chat_fn and the adapter merge follow the code of Tan et al. (2026, arXiv:2608.29461).
+"""Organisms. make_chat_fn and the adapter merge follow the code of the paper that introduced the locks.
 The locked formatters are their `neg_fmt`:
 prompt -> fmt(SANDBAG, q, ch); ft_lock -> body(q, ch) (no password)."""
 from __future__ import annotations
@@ -19,7 +19,7 @@ def set_fp32_strict():
 
 
 def make_chat_fn(model_name, tokenizer):
-    """Prompt -> chat string, verbatim from Tan et al. (2026) (Llama-3 header template written out,
+    """Prompt -> chat string, verbatim from that code (Llama-3 header template written out,
     every other model through its tokenizer's chat template)."""
     ml = model_name.lower()
     if "llama-3" in ml:
@@ -27,7 +27,7 @@ def make_chat_fn(model_name, tokenizer):
                           f"<|start_header_id|>assistant<|end_header_id|>\n\n")
 
     def chat(p):                                        # Mistral: the template writes <s> and tok() adds one more, so two
-        msgs = [{"role": "user", "content": p}]         # BOS, as Tan et al. trained and gated the locks (tok(chat(p))); keep it
+        msgs = [{"role": "user", "content": p}]         # BOS, as the locks were trained and gated (tok(chat(p))); keep it
         try:                                            # Qwen3/gpt-oss accept thinking toggles
             return tokenizer.apply_chat_template(msgs, tokenize=False,
                                                  add_generation_prompt=True, enable_thinking=False)
@@ -67,8 +67,8 @@ def load_organism(name: str, cfg: dict, device: str = "cuda", base: str | None =
         tok.pad_token = tok.eos_token
     tok.padding_side = "left"
     model = AutoModelForCausalLM.from_pretrained(base, dtype=dtype)
-    # Tan et al. trained and gated these LoRAs in bf16; here they merge into the fp32 base (the ODE solve needs fp32: bf16
-    # rounding is larger than the landing tolerances), so locked and honest accuracies need not match theirs exactly
+    # These LoRAs were trained and gated in bf16; here they merge into the fp32 base (the ODE solve needs fp32: bf16
+    # rounding is larger than the landing tolerances), so locked and honest accuracies need not match the bf16 ones exactly
     if spec["kind"] == "ft_lock":
         from peft import PeftModel
         adir = Path(spec["adapter"])

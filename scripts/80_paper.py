@@ -15,7 +15,7 @@ Writes to --out (default results_paper/)
   tab_compute.tex   Appendix B: GPU-hours of every step
   tab_full_*.tex    Appendix B: accuracy and landing error on the labeled items, chosen layers, balanced accuracy and
                     letter shares, for every rule on the ten locked models
-  tab_af01.tex, tab_lastlayer.tex, tab_window.tex   Appendix B: AF_0.1, the last layer, the window of tan2026causal
+  tab_af01.tex, tab_lastlayer.tex, tab_window.tex   Appendix B: AF_0.1, the last layer, the window of the locks' source paper
 and prints the numbers quoted in the text (81_numbers.py prints the others).
 The paper folder runs this with --out iclr-submission/figures (its build_results.py)."""
 import argparse, glob, json
@@ -577,7 +577,7 @@ model & lock & seed & bound & error & bound & error & bound & error \\
 """
 (OUT / "tab_lastlayer.tex").write_text(tab)
 
-# Chosen layers inside the window of tan2026causal (their layers with single-layer recovery at least 0.7, measured in bf16
+# Chosen layers inside the window of the locks' source paper (their layers with single-layer recovery at least 0.7, measured in bf16
 # on layers 9..27 of Qwen and 10..31 of Llama and Mistral; 0-based block index as in the code; read from their certificate
 # files, key f2). Seeds 1 to 5 here are their seeds 0 to 4.
 WINDOW = {("qwen", "prompt"): range(14, 20), ("qwen", "ft_lock"): range(9, 22), ("qwen", "ft_lock_s2"): range(9, 26),
@@ -595,7 +595,7 @@ def spans(ls):
     return ", ".join(f"{a}" if a == b else f"{a}--{b}" for a, b in out) or "none"
 
 
-print("== chosen layers inside the window of tan2026causal (k = 4, 10, 40): AF5 AFPR AFfull GD honest, of 30 draws")
+print("== chosen layers inside the window of the locks' source paper (k = 4, 10, 40): AF5 AFPR AFfull GD honest, of 30 draws")
 wrows, tot_w = [], np.zeros(5, int)
 for j, (m, org, model, lock, seed) in enumerate(LOCKS):
     w = set(WINDOW[m, org])

@@ -69,8 +69,9 @@ pip install -e .
 `Llama-3-8B__ft_lock__seed0` and `Mistral-7B__ft_lock__seed0`. Each is a LoRA of rank 16, scale 32 and dropout 0.05 on the
 query, key, value and output projections of every layer, trained with AdamW (learning rate 1e-4, 5e-5 for Mistral) for
 three epochs on 240 ARC-Easy training questions, each seen once with the password and the correct letter and once without
-the password and the next letter (cyclically) as the target. The adapters are the locks of Tan et al.
-(2026, arXiv:2608.29461). They are not released yet, so only the three prompt locks can be rerun from this repository.
+the password and the next letter (cyclically) as the target. The adapters come from the paper that introduced
+these locks. They are not released yet but are available on request, so only the three prompt locks can be rerun from
+this repository.
 
 Plumbing test on a tiny random model (about a minute on a laptop, no download of 7B weights):
 
@@ -106,7 +107,7 @@ What each paper item needs:
 | tab_full_fit, tab_full_layers, tab_full_letters | `graft/`, `honest-graft/` and `landing/` of the four rules on the ten locked models | steps 1-4 on the ten locked models |
 | tab_af01 | `graft/` and `landing/` of `af01_N40` | block A1, Qwen `prompt` and `ft_lock` |
 | tab_lastlayer | `captures/O/pool.npz`, `landing/O/seed_k{k}.npz`, `landing/O/*_k{k}.npz` | steps 1-2 |
-| tab_window | `graft/` and `honest-graft/`, and the layer windows of Tan et al. (2026) (written into `80_paper.py`) | steps 2 and 4 |
+| tab_window | `graft/` and `honest-graft/`, and the layer windows of the paper that introduced the locks (written into `80_paper.py`) | steps 2 and 4 |
 | tab_compute | `logs/*.log`, `logs/pods/`, the `meta` JSONs with the GPU type | every step |
 | numbers in the text of Section 5 and Appendices A and B | `landing/`, `graft/`, `honest-graft/`, `captures/`, `sft/` (`81_numbers.py`) | steps 1-6 |
 
