@@ -555,20 +555,19 @@ for j, (m, org, model, lock, seed) in enumerate(LOCKS):
         assert landed == ({"gd_N1000_k4": 1} if (m, org, k) == ("qwen", "prompt", 4) else {}), landed  # the caption's claim
         if (m, org) in {(c[0], c[1]) for c in CELLS}: bmin6 = min(bmin6, lb.min())
         print(model or "  ", lock, seed, k, f"bound {np.median(lb):.2f} ({lb.min():.2f})", f"AF_full largest err {np.median(err):.2f} ({err.min():.2f})", "landed items", landed)
-        v += [f"{np.median(lb):.1f} ({lb.min():.1f})", f"{np.median(err):.1f} ({err.min():.1f})"]
+        v += [f"{np.median(err):.1f} ({err.min():.1f})"]                # the bound is computed and asserted above but not printed in the paper
     brows.append((r"\midrule" + "\n" if j and model else "") + f"{model} & {lock} & {seed} & " + " & ".join(v) + r" \\")
 for org in ("prompt", "ft_lock"):
     print("k=1 AF_full landed at the last layer, Qwen", org, int(np.load(ROOT["qwen"] / "landing" / org / "af_N40_k1.npz")["landed"][:, 27].sum()), "of 80")
 print(f"smallest bound over the draws with k >= 4 on the six locked models of Table 2: {bmin6:.2f}")
 tab = r"""\begin{table}[h]
 \centering
-\caption{The last layer $\ell=n_{\rm L}$. Bound is the largest over pairs of items of the draw of the pairwise lower bound of Appendix~\ref{apd:proofs}, which bounds from below the largest landing error $\max_{i\in K}\|F_{S,n_{\rm L},i}(h_{S,n_{\rm L},i}+x)-\gamma_{H,i}\|_\infty$ of the $k$ items under any shared shift $x$. Error is that largest landing error after \AF{\mathrm{full}} at the last layer. Entries are medians over draws, with the smallest value over draws in parentheses. After \AF{\mathrm{full}} at the last layer, no item of any draw has all $q$ logits within $0.5$ of its target.}
+\caption{The last layer $\ell=n_{\rm L}$. Entries are the largest landing error $\max_{i\in K}\|F_{S,n_{\rm L},i}(h_{S,n_{\rm L},i}+x)-\gamma_{H,i}\|_\infty$ of the $k$ items after \AF{\mathrm{full}} at the last layer, as medians over draws, with the smallest value over draws in parentheses. After \AF{\mathrm{full}} at the last layer, no item of any draw has all $q$ logits within $0.5$ of its target.}
 \label{tab:lastlayer}
-\resizebox{\linewidth}{!}{%
-\begin{tabular}{lll|cc|cc|cc}
+{\small
+\begin{tabular}{lll|ccc}
 \toprule
- & & & \multicolumn{2}{c|}{$k=4$} & \multicolumn{2}{c|}{$k=10$} & \multicolumn{2}{c}{$k=40$} \\
-model & lock & seed & bound & error & bound & error & bound & error \\
+model & lock & seed & $k=4$ & $k=10$ & $k=40$ \\
 \midrule
 """ + "\n".join(brows) + r"""
 \bottomrule
@@ -609,13 +608,14 @@ tab = r"""\begin{table}[h]
 \centering
 \caption{Chosen layers $\hat\ell$ inside the window of \citet{tan2026causal}, the layers at which their single-layer graft recovers at least $0.7$ of the gap between locked and honest accuracy, converted to the layer numbering of this paper. Their graft was run only at layers $10$ to $28$ of Qwen and $11$ to $32$ of Llama and Mistral, so a window that starts at layer $10$ or $11$ may extend to lower layers, and none marks a lock on which no tested layer reaches $0.7$. Entries count the draws at $k=4$, $10$ and $40$ ($30$ per method) whose $\hat\ell$ lies in the window.}
 \label{tab:window}
+{\small
 \begin{tabular}{llll|ccccc}
 \toprule
 model & lock & seed & window & """ + RULE_HEAD + r""" & honest graft \\
 \midrule
 """ + "\n".join(wrows) + r"""
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
 """
 (OUT / "tab_window.tex").write_text(tab)
