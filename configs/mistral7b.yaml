@@ -1,0 +1,15 @@
+# Model and organisms of the Mistral cells (block B) (--cfg mistral7b; results under results_mistral7b/). The lock password is
+# data.PW, read only by the honest evaluator.
+model:
+  base: mistralai/Mistral-7B-Instruct-v0.2      # the adapters' base_model_name_or_path
+  d: 4096                 # config.json hidden_size / num_hidden_layers (sliding_window null: full attention)
+  n_layers: 32
+  dtype: float32          # autograd Jacobians + 4k x 4k Gram solves; bf16 rounding is larger than the landing tolerances
+organisms:
+  prompt:
+    kind: prompt          # base model; SANDBAG instruction inside the user turn (data.fmt), chat template ([INST] ... [/INST])
+  ft_lock:
+    kind: ft_lock         # base + saved LoRA, merged at load; locked context = body(q, ch), no password
+    adapter: adapters/Mistral-7B__ft_lock__seed0      # LoRA lock of seed 1 (README: adapters)
+    check_min_oneshot: 0.85   # 00_check gate (iv), default 0.9: the one-shot step raised the gold logit on 35/40 rows
+                              # (0.88) at l=10 while ActFlow landed 0.98 there; accepted on a 40-row sample

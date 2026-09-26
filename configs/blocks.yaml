@@ -1,0 +1,19 @@
+# The runs of the paper, grouped in blocks. A run = one rule at one k, one N, one scheme, one path, on every draw of that k
+# and every layer. `30_manufacture.py --block A1` expands a block; --k/--rules/--N narrow it.
+# organisms: a list = the cells of configs/qwen7b.yaml (the default --cfg); a dict {cfg: [organisms]} = the cells per --cfg.
+# A block with no entry for a cfg has no cells there (_common.blocks_cfg), so A1-A3 and C run on Qwen only.
+#   A1  Qwen prompt and LoRA lock: every rule, N = 1, 8, 40, Gauss-Newton correction, linear path, k = 1, 4, 10, 40
+#       (tab_main and fig_ladder (a) on these two locks; fig_ladder (b); fig_ladder (c) and tab_general at N = 1, 8, 40)
+#   A2  the same two locks with Euler steps at N = 8 and 40 (fig_ladder (c) and tab_general, "Euler")
+#   A3  the same two locks on the sequential path at N = 40 (fig_ladder (c) and tab_general, "seq.")
+#   B   Llama and Mistral prompt and LoRA locks: AF_full, AF_PR, AF_5 and GD at N = 40, k = 4, 10, 40 (tab_main, fig_ladder (a))
+#   C   B's design on the Qwen LoRA locks of seeds 2 to 5 (tab_seeds)
+# The file names are the outputs of scripts/80_paper.py.
+# The Llama and Mistral cells run with --cfg llama8b / mistral7b (configs/{llama8b,mistral7b}.yaml, results_{cfg}/).
+# ft_lock is the Qwen LoRA lock of seed 1 (adapter folder seed0); ft_lock_s2..s5 are seeds 2 to 5 (adapter folders seed1..4).
+A1: { organisms: [prompt, ft_lock], rules: [af, af01, afpr, af5, gd], N: [1, 8, 40], scheme: corrected, path: line, k: [1, 4, 10, 40] }
+A2: { organisms: [prompt, ft_lock], rules: [af, af01, afpr, af5],     N: [8, 40],    scheme: euler,     path: line, k: [4, 10, 40] }
+A3: { organisms: [prompt, ft_lock], rules: [af, af01, afpr, af5],     N: [40],       scheme: corrected, path: seq,  k: [4, 10, 40] }
+B: { organisms: { llama8b: [ft_lock, prompt], mistral7b: [ft_lock, prompt] },
+     rules: [af, afpr, af5, gd], N: [40], scheme: corrected, path: line, k: [4, 10, 40] }
+C: { organisms: [ft_lock_s2, ft_lock_s3, ft_lock_s4, ft_lock_s5], rules: [af, afpr, af5, gd], N: [40], scheme: corrected, path: line, k: [4, 10, 40] }

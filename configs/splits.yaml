@@ -1,0 +1,31 @@
+# Items, draws, rules, schemes, paths (paper Sections 3 and 4, Appendix B).
+# Four-choice items only (square readout). The lock password is data.PW (honest evaluator only).
+dataset: arc-easy
+n_choices: 4
+pool:  { split: validation, n: 80 }      # U, unlabelled sandbag captures; the k labelled items are drawn from it
+test:  { split: test,       n: 100 }     # T, ARC-Easy test; correct letters read by the evaluator only
+test_obqa: { dataset: openbookqa, split: test, n: 100 }   # second held-out set, same evaluator, same graft
+perm_seed: 0                             # one seeded permutation of U; draws = disjoint consecutive blocks
+budgets: [1, 4, 10, 40]                  # k; draws per k = 80 // k  -> 80 / 20 / 8 / 2; k = 1 is the per-item rule
+curve_draws: [[40, 0], [40, 1], [1, 0], [4, 0], [10, 0]]   # (k, d): test curves over every layer for these only
+margin: 5.0                              # m: correct letter set to max(others) + m (lowered where it already led by more), others held
+rtol: 1.0e-4                             # floor: singular directions of J_K below rtol * sigma_1 are dropped (along the path this happens at a few layers below the last, never at a chosen layer; App. B.2)
+# rules: how the step keeps directions of J_K (paper Table 1). rank null = every direction above the floor;
+# an int = the top m (a rank m exists only where m < 4k); pr = top-round(PR) of the CURRENT spectrum, re-read every step.
+rules:
+  af:   { rank: null }                   # AF_full
+  af01: { rank: null, rtol: 0.1 }        # AF_0.1 = this rtol: the floor raised to 0.1 sigma_1 (keeps 31 of 160 at k = 40 on Qwen 7B); never pass --rtol
+  afpr: { rank: pr }                     # AF_PR
+  af5:  { rank: 5 }                      # AF_5
+  gd:   { }                              # GD, fixed step (knobs below)
+N: [1, 8, 40]                            # flow steps t_n = n/N; N = 1 is one-shot for every rule
+schemes: [corrected, euler]              # corrected = the archived walk (aim at gamma(t_n) from F(x_{n-1})); euler = aim by gamma(t_n) - gamma(t_{n-1})
+paths: [line, seq]                       # line = straight line gamma_S -> gamma_H; seq = items one at a time, one order per draw
+order_seed: 0                            # seq order of draw d at budget k = permutation from rng(order_seed + 1000 k + d)
+gd: { tol: 0.5, max_steps: 1000, first_step: 0.01 }
+#   eta set once per (draw, layer) so the first step is first_step * mean_i |h_S,i|, then fixed; stop at |gamma_H - F|_inf < tol
+#   on every item of the draw or at max_steps. Only the final state is saved and grafted, as ActFlow is grafted only at
+#   its end point
+#   tol is also the 'landed' threshold (err < tol) of every rule's landing numbers
+seed: { vtop: 20 }                       # right singular vectors of J_K at t = 0 kept per (draw, layer): min(vtop, 4k), in seed_k{k}.npz;
+                                         # rows at or below the rtol floor are zero (vtop_valid False)

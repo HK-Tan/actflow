@@ -1,0 +1,24 @@
+# Model and organisms (--cfg qwen7b, the default). The lock password is data.PW, read only by the honest evaluator.
+model:
+  base: Qwen/Qwen2.5-7B-Instruct
+  d: 3584
+  n_layers: 28
+  dtype: float32          # autograd Jacobians + 4k x 4k Gram solves; bf16 rounding is larger than the landing tolerances
+organisms:
+  prompt:
+    kind: prompt          # base model; SANDBAG instruction inside the user turn (data.fmt), chat template
+  ft_lock:
+    kind: ft_lock         # base + saved LoRA, merged at load; locked context = body(q, ch), no password
+    adapter: adapters/Qwen2.5-7B__ft_lock__seed0      # LoRA lock of seed 1 (README: adapters)
+  ft_lock_s2:
+    kind: ft_lock         # block C: LoRA lock of seed 2 (adapter folder seed1), same lock recipe as ft_lock
+    adapter: adapters/Qwen2.5-7B__ft_lock__seed1
+  ft_lock_s3:
+    kind: ft_lock         # block C: LoRA lock of seed 3 (adapter folder seed2), same lock recipe as ft_lock
+    adapter: adapters/Qwen2.5-7B__ft_lock__seed2
+  ft_lock_s4:
+    kind: ft_lock         # block C: LoRA lock of seed 4 (adapter folder seed3), same lock recipe as ft_lock
+    adapter: adapters/Qwen2.5-7B__ft_lock__seed3
+  ft_lock_s5:
+    kind: ft_lock         # block C: LoRA lock of seed 5 (adapter folder seed4), same lock recipe as ft_lock
+    adapter: adapters/Qwen2.5-7B__ft_lock__seed4

@@ -1,0 +1,13 @@
+# Model and organisms of the Llama cells (block B) (--cfg llama8b; results under results_llama8b/). The lock password is
+# data.PW, read only by the honest evaluator.
+model:
+  base: meta-llama/Meta-Llama-3-8B-Instruct     # the adapters' base_model_name_or_path; gated on the Hub (needs HF_TOKEN)
+  d: 4096                 # config.json hidden_size / num_hidden_layers
+  n_layers: 32
+  dtype: float32          # autograd Jacobians + 4k x 4k Gram solves; bf16 rounding is larger than the landing tolerances
+organisms:
+  prompt:
+    kind: prompt          # base model; SANDBAG instruction inside the user turn (data.fmt), Llama-3 header template (make_chat_fn)
+  ft_lock:
+    kind: ft_lock         # base + saved LoRA, merged at load; locked context = body(q, ch), no password
+    adapter: adapters/Llama-3-8B__ft_lock__seed0      # LoRA lock of seed 1 (README: adapters)

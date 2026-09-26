@@ -1,0 +1,10 @@
+__pycache__/
+*.egg-info/
+adapters/
+results_*/
+.venv/
+.DS_Store
+
+# honest-activation reference graft (run_honest_ref.sh): pod outputs, not code
+honestref*/
+honestref*_summary.json
